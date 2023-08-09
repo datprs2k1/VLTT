@@ -61,7 +61,7 @@ namespace AutoLogin
                         var x = KAutoHelper.CaptureHelper.ResizeImage(screen, 960, 560);
 
 
-                        var cauhoi = KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(181, 86, 600, 32));
+                        var cauhoi = KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(181, 86, 400, 32));
                         var dapanA = KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(192, 262, 168, 32)),1.2);
                         var dapanB = KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(392, 262, 168, 32)), 1.2);
                         var dapanC = KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(592, 262, 168, 32)), 1.2);
@@ -72,11 +72,11 @@ namespace AutoLogin
                             Languages[] langs = { Languages.Vietnamese };
 
                             api.Init(Languages.Vietnamese);
-                            string cauhoitext = api.GetTextFromImage(cauhoi);
-                            string dapanAtext = api.GetTextFromImage(dapanA);
-                            string dapanBtext = api.GetTextFromImage(dapanB);
-                            string dapanCtext = api.GetTextFromImage(dapanC);
-                            string dapanDtext = api.GetTextFromImage(dapanD);
+                            string cauhoitext = api.GetTextFromImage(cauhoi) ?? "";
+                            string dapanAtext = api.GetTextFromImage(dapanA) ?? "";
+                            string dapanBtext = api.GetTextFromImage(dapanB) ?? "";
+                            string dapanCtext = api.GetTextFromImage(dapanC) ?? "";
+                            string dapanDtext = api.GetTextFromImage(dapanD) ?? "";
 
                             var httpClient = new HttpClient();
 
