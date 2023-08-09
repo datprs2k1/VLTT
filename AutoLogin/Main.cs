@@ -1,4 +1,5 @@
-﻿using IronOcr;
+﻿using Patagames.Ocr.Enums;
+using Patagames.Ocr;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -61,97 +62,58 @@ namespace AutoLogin
 
 
                         var cauhoi = KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(181, 86, 600, 32));
-                        var dapanA = KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(192, 262, 168, 32));
-                        var dapanB = KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(392, 262, 168, 32));
-                        var dapanC = KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(592, 262, 168, 32));
-                        var dapanD = KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(192, 302, 168, 32));
+                        var dapanA = KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(192, 262, 168, 32)),1.2);
+                        var dapanB = KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(392, 262, 168, 32)), 1.2);
+                        var dapanC = KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(592, 262, 168, 32)), 1.2);
+                        var dapanD = KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(192, 302, 168, 32)), 1.2);
 
-                        string cauhoitext = "";
-                        string dapanAtext = "";
-                        string dapanBtext = "";
-                        string dapanCtext = "";
-                        string dapanDtext = "";
-
-                        var ocr = new IronTesseract();
-
-                        ocr.Language = OcrLanguage.Vietnamese;
-                        ocr.AddSecondaryLanguage(OcrLanguage.English);
-
-                        using (var input = new OcrInput(cauhoi))
+                        using (var api = OcrApi.Create())
                         {
-                            input.Scale(120);
-                            input.Deskew();
-                            OcrResult result = ocr.Read(input);
-                            cauhoitext = result.Text;
+                            Languages[] langs = { Languages.Vietnamese };
+
+                            api.Init(Languages.Vietnamese);
+                            string cauhoitext = api.GetTextFromImage(cauhoi);
+                            string dapanAtext = api.GetTextFromImage(dapanA);
+                            string dapanBtext = api.GetTextFromImage(dapanB);
+                            string dapanCtext = api.GetTextFromImage(dapanC);
+                            string dapanDtext = api.GetTextFromImage(dapanD);
+
+                            var httpClient = new HttpClient();
+
+                            var response = await httpClient.GetAsync("http://vannt.click/get.php?cauhoi=" + cauhoitext + "&A=" + dapanAtext + "&B=" + dapanBtext + "&C=" + dapanCtext + "&D=" + dapanDtext);
+
+                            var answer = await response.Content.ReadAsStringAsync();
+
+                            if (answer.Equals("1"))
+                            {
+                                KAutoHelper.ADBHelper.TapByPercent(device, 30.5, 49.0);
+                            }
+                            else if (answer.Equals("2"))
+                            {
+                                KAutoHelper.ADBHelper.TapByPercent(device, 49.0, 49.0);
+                            }
+                            else if (answer.Equals("3"))
+                            {
+                                KAutoHelper.ADBHelper.TapByPercent(device, 70.6, 49);
+                            }
+                            else
+                            {
+                                KAutoHelper.ADBHelper.TapByPercent(device, 28.4, 56.5);
+                            }
+
+                            Task.Delay(1000).Wait();
+
+                            KAutoHelper.ADBHelper.TapByPercent(device, 54.4, 31.4);
+
+                            Task.Delay(2000).Wait();
+
+                            i++;
                         }
-
-                        using (var input = new OcrInput(dapanA))
-                        {
-                            input.Scale(120);
-                            input.Deskew();   //fixes rotation and perspectiv
-                            OcrResult result = ocr.Read(input);
-                            dapanAtext = result.Text;
-                        }
-
-                        using (var input = new OcrInput(dapanB))
-                        {
-                            input.Scale(120);
-                            input.Deskew();   //fixes rotation and perspectiv
-                            OcrResult result = ocr.Read(input);
-                            dapanBtext = result.Text;
-                        }
-
-                        using (var input = new OcrInput(dapanC))
-                        {
-                            input.Scale(120);
-                            input.Deskew();   //fixes rotation and perspectiv
-                            OcrResult result = ocr.Read(input);
-                            dapanCtext = result.Text;
-                        }
-
-                        using (var input = new OcrInput(dapanD))
-                        {
-                            input.Scale(120);
-                            input.Deskew();   //fixes rotation and perspectiv
-                            OcrResult result = ocr.Read(input);
-                            dapanDtext = result.Text;
-                        }
-
-                        var httpClient = new HttpClient();
-
-                        var response = await httpClient.GetAsync("http://vannt.click/get.php?cauhoi=" + cauhoitext + "&A=" + dapanAtext + "&B=" + dapanBtext + "&C=" + dapanCtext + "&D=" + dapanDtext);
-
-                        var answer = await response.Content.ReadAsStringAsync();
-
-                        if (answer.Equals("1"))
-                        {
-                            KAutoHelper.ADBHelper.TapByPercent(device, 30.5, 49.0);
-                        }
-                        else if (answer.Equals("2"))
-                        {
-                            KAutoHelper.ADBHelper.TapByPercent(device, 49.0, 49.0);
-                        }
-                        else if (answer.Equals("3"))
-                        {
-                            KAutoHelper.ADBHelper.TapByPercent(device, 70.6, 49);
-                        }
-                        else
-                        {
-                            KAutoHelper.ADBHelper.TapByPercent(device, 28.4, 56.5);
-                        }
-
-                        Task.Delay(1000).Wait();
-
-                        KAutoHelper.ADBHelper.TapByPercent(device, 54.4, 31.4);
-
-                        Task.Delay(2000).Wait();
 
                         a.Progress = i + "/40";
                         a.Status = "Đang chạy";
 
                         dataGridView1.Refresh();
-
-                        i++;
 
                         Task.Delay(2000).Wait();
 
