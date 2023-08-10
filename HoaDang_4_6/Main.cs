@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace HoaDang
 {
@@ -57,11 +58,11 @@ namespace HoaDang
 
                         var x = KAutoHelper.CaptureHelper.ResizeImage(screen, 960, 560);
 
-                        var cauhoi = KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(181, 86, 400, 32));
-                        var dapanA = KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(192, 262, 168, 32)), 1.1);
-                        var dapanB = KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(392, 262, 168, 32)), 1.1);
-                        var dapanC = KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(592, 262, 168, 32)), 1.1);
-                        var dapanD = KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(192, 302, 168, 32)), 1.1);
+                        var cauhoi = Invert(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(181, 86, 400, 32)));
+                        var dapanA = Invert(KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(192, 262, 168, 32)), 1.05));
+                        var dapanB = Invert(KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(392, 262, 168, 32)), 1.05));
+                        var dapanC = Invert(KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(592, 262, 168, 32)), 1.05));
+                        var dapanD = Invert(KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(192, 302, 168, 32)), 1.05));
 
                         using (var api = OcrApi.Create())
                         {
@@ -137,6 +138,7 @@ namespace HoaDang
             devices.Clear();
             var cmd = "adb kill-server && adb start-server";
             KAutoHelper.ADBHelper.ExecuteCMD(cmd.ToString());
+
             listDevice = KAutoHelper.ADBHelper.GetDevices();
 
 
@@ -150,7 +152,23 @@ namespace HoaDang
                 devices.Add(device);
             });
             dataGridView1.AutoGenerateColumns = false;
+            dataGridView1.Refresh();
 
+        }
+
+        public Bitmap Invert(Bitmap image)
+        {
+            for (int y = 0; (y <= (image.Height - 1)); y++)
+            {
+                for (int x = 0; (x <= (image.Width - 1)); x++)
+                {
+                    Color inv = image.GetPixel(x, y);
+                    inv = Color.FromArgb(inv.A, (255 - inv.R), (255 - inv.G), (255 - inv.B));
+                    image.SetPixel(x, y, inv);
+                }
+            }
+
+            return image;
         }
     }
 
