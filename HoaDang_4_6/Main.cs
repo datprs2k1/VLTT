@@ -17,6 +17,7 @@ namespace HoaDang
         public List<string> listDevice = new List<string>();
         public List<Device> devices = new List<Device>();
         public bool status = false;
+        public bool isRun = false;
         public Main()
         {
             InitializeComponent();
@@ -40,6 +41,8 @@ namespace HoaDang
             dataGridView1.AutoGenerateColumns = false;
             dataGridView1.Refresh();
 
+            txtDevice.Text = listDevice.Count.ToString();
+
         }
 
         private void btnList1_Click(object sender, EventArgs e)
@@ -52,7 +55,7 @@ namespace HoaDang
 
                     int i = 1;
 
-                    while (i <= 40)
+                    while (i <= 40 && isRun)
                     {
                         var screen = KAutoHelper.ADBHelper.ScreenShoot(device);
 
@@ -121,6 +124,9 @@ namespace HoaDang
                     a.Progress = (i - 1) + "/40";
                     a.Status = "Hoàn thành";
 
+                    i = 1;
+                    isRun = false;
+
                     dataGridView1.Refresh();
                     return;
 
@@ -154,6 +160,8 @@ namespace HoaDang
             dataGridView1.AutoGenerateColumns = false;
             dataGridView1.Refresh();
 
+            txtDevice.Text = devices.Count().ToString();
+
         }
 
         public Bitmap Invert(Bitmap image)
@@ -169,6 +177,11 @@ namespace HoaDang
             }
 
             return image;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            isRun = false;
         }
     }
 
