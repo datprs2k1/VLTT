@@ -47,6 +47,8 @@ namespace HoaDang
 
         private void btnList1_Click(object sender, EventArgs e)
         {
+            isRun = true;
+
             foreach (var device in listDevice)
             {
                 Task t = new Task(async () =>
@@ -102,13 +104,14 @@ namespace HoaDang
                                 KAutoHelper.ADBHelper.TapByPercent(device, 28.4, 56.5);
                             }
 
+                            i++;
+
                             Task.Delay(1000).Wait();
 
                             KAutoHelper.ADBHelper.TapByPercent(device, 54.4, 31.4);
 
                             Task.Delay(2000).Wait();
 
-                            i++;
                         }
 
                         a.Progress = i + "/40";
@@ -142,8 +145,6 @@ namespace HoaDang
         {
             listDevice.Clear();
             devices.Clear();
-            var cmd = "adb kill-server && adb start-server";
-            KAutoHelper.ADBHelper.ExecuteCMD(cmd.ToString());
 
             listDevice = KAutoHelper.ADBHelper.GetDevices();
 
