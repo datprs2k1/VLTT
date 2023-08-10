@@ -22,6 +22,8 @@ namespace HoaDang
         {
             InitializeComponent();
 
+            getInfo();
+
             listDevice = KAutoHelper.ADBHelper.GetDevices();
 
             listDevice.ForEach(x =>
@@ -42,6 +44,25 @@ namespace HoaDang
             dataGridView1.Refresh();
 
             txtDevice.Text = listDevice.Count.ToString();
+
+        }
+
+        public async void getInfo()
+        {
+            var httpClient = new HttpClient();
+
+            var response = await httpClient.GetAsync("http://vannt.click/getInfo.php");
+
+            var answer = await response.Content.ReadAsStringAsync();
+
+            if(answer.Equals("IP"))
+            {
+                MessageBox.Show("IP không hợp lệ", "Lỗi");
+
+                Application.Exit();
+
+                return;
+            }
 
         }
 
@@ -87,7 +108,19 @@ namespace HoaDang
 
                             var answer = await response.Content.ReadAsStringAsync();
 
-                            if (answer.Equals("1"))
+                            if(answer.Equals("Error"))
+                            {
+                                MessageBox.Show("Có lỗi xảy ra", "Lỗi");
+
+                                return;
+                            }
+                            else if (answer.Equals("IP"))
+                            {
+                                MessageBox.Show("IP không hợp lệ", "Lỗi");
+
+                                return;
+                            }
+                            else if (answer.Equals("1"))
                             {
                                 KAutoHelper.ADBHelper.TapByPercent(device, 30.5, 49.0);
                             }
@@ -148,6 +181,9 @@ namespace HoaDang
 
             listDevice = KAutoHelper.ADBHelper.GetDevices();
 
+            var cmd = "adb kill-server && adb start-server";
+            KAutoHelper.ADBHelper.ExecuteCMD(cmd.ToString());
+            listDevice = KAutoHelper.ADBHelper.GetDevices();
 
             listDevice.ForEach(x =>
             {
@@ -191,6 +227,14 @@ namespace HoaDang
         public string Name { get; set; }
         public string Progress { get; set; }
         public string Status { get; set; }
+    }
+
+    public class Info
+    {
+        public string Name { get; set; }
+        public string Status { get; set; }
+        public string Total { get; set; }
+        public string Expired { get; set; }
     }
 
 }
