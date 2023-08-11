@@ -58,6 +58,9 @@
     <Reference Include="KAutoHelper">
       <HintPath>..\..\..\ADBHowkteamLibrary\KAutoHelper V2\KAutoHelper.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Patagames.Ocr, Version=4.5.2.46, Culture=neutral, PublicKeyToken=be14d8e1fe46e570, processorArchitecture=MSIL">
       <HintPath>..\packages\Tesseract.Net.SDK.4.5.411\lib\net46\Patagames.Ocr.dll</HintPath>
     </Reference>

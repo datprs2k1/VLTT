@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
+using Newtonsoft.Json;
 
 namespace HoaDang
 {
@@ -51,17 +52,23 @@ namespace HoaDang
         {
             var httpClient = new HttpClient();
 
-            var response = await httpClient.GetAsync("http://vannt.click/getInfo.php");
+            var response = await httpClient.GetAsync("http://vannt.click/getinfo");
 
             var answer = await response.Content.ReadAsStringAsync();
 
-            if(answer.Equals("IP"))
+            var info = JsonConvert.DeserializeObject<InfoResult>(answer);
+
+            if (!info.Status)
             {
-                MessageBox.Show("IP không hợp lệ", "Lỗi");
-
+                MessageBox.Show(info.Message, "Lỗi");
                 Application.Exit();
-
-                return;
+            }
+            else
+            {
+                lblName.Text = "Xin chào " + info.Name;
+                lblExpired.Text = info.Expired;
+                lblStatus.Text = info.Message;
+                lblTotal.Text = info.Total;
             }
 
         }
@@ -104,31 +111,28 @@ namespace HoaDang
 
                             var httpClient = new HttpClient();
 
-                            var response = await httpClient.GetAsync("http://vannt.click/get.php?cauhoi=" + cauhoitext + "&A=" + dapanAtext + "&B=" + dapanBtext + "&C=" + dapanCtext + "&D=" + dapanDtext);
+                            var response = await httpClient.GetAsync("http://vannt.click/get?cauhoi=" + cauhoitext + "&A=" + dapanAtext + "&B=" + dapanBtext + "&C=" + dapanCtext + "&D=" + dapanDtext);
 
-                            var answer = await response.Content.ReadAsStringAsync();
+                            var data = await response.Content.ReadAsStringAsync();
 
-                            if(answer.Equals("Error"))
+                            var answer = JsonConvert.DeserializeObject<AnswerResult>(data);
+
+                            if(!answer.Status)
                             {
-                                MessageBox.Show("Có lỗi xảy ra", "Lỗi");
+                                MessageBox.Show(answer.Message, "Lỗi");
 
-                                return;
+                                Application.Exit();
+                                
                             }
-                            else if (answer.Equals("IP"))
-                            {
-                                MessageBox.Show("IP không hợp lệ", "Lỗi");
-
-                                return;
-                            }
-                            else if (answer.Equals("1"))
+                            else if (answer.Message.Equals("1"))
                             {
                                 KAutoHelper.ADBHelper.TapByPercent(device, 30.5, 49.0);
                             }
-                            else if (answer.Equals("2"))
+                            else if (answer.Message.Equals("2"))
                             {
                                 KAutoHelper.ADBHelper.TapByPercent(device, 49.0, 49.0);
                             }
-                            else if (answer.Equals("3"))
+                            else if (answer.Message.Equals("3"))
                             {
                                 KAutoHelper.ADBHelper.TapByPercent(device, 70.6, 49);
                             }
@@ -220,6 +224,11 @@ namespace HoaDang
         {
             isRun = false;
         }
+
+        private void lblExpired_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 
     public class Device
@@ -229,12 +238,20 @@ namespace HoaDang
         public string Status { get; set; }
     }
 
-    public class Info
+    public class InfoResult
     {
+        public string Message { get; set; }
+        public bool Status { get; set; }
         public string Name { get; set; }
-        public string Status { get; set; }
-        public string Total { get; set; }
         public string Expired { get; set; }
+        public string Total { get; set; }
+    }
+
+
+    public class AnswerResult
+    {
+        public string Message { get; set; }
+        public bool Status { get; set; }
     }
 
 }
