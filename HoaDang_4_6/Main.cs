@@ -17,8 +17,10 @@ namespace HoaDang
     {
         public List<string> listDevice = new List<string>();
         public List<Device> devices = new List<Device>();
+        public List<string> selects = new List<string>();
         public bool status = false;
         public bool isRun = false;
+        public HttpClient httpClient = new HttpClient();
         public Main()
         {
             InitializeComponent();
@@ -50,8 +52,6 @@ namespace HoaDang
 
         public async void getInfo()
         {
-            var httpClient = new HttpClient();
-
             var response = await httpClient.GetAsync("http://vannt.click/getinfo");
 
             var answer = await response.Content.ReadAsStringAsync();
@@ -75,9 +75,23 @@ namespace HoaDang
 
         private void btnList1_Click(object sender, EventArgs e)
         {
+            selects.Clear();
+
+            foreach(DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (row.Cells[0].Value != null && row.Cells[0].Value.ToString().Equals("True"))
+                {
+                    selects.Add(row.Cells[1].Value.ToString());
+                }
+            }
+
+
+            var list = selects.ToList().Count > 0 ? selects : listDevice;
+
+
             isRun = true;
 
-            foreach (var device in listDevice)
+            foreach (var device in list)
             {
                 Task t = new Task(async () =>
                 {
@@ -85,13 +99,19 @@ namespace HoaDang
 
                     int i = 1;
 
-                    while (i <= 40 && isRun)
+                    bool run = true;
+
+                    KAutoHelper.ADBHelper.TapByPercent(device, 3.2, 33.2);
+
+                    Task.Delay(5000).Wait();
+
+                    while (i <= 40 && isRun && run)
                     {
                         var screen = KAutoHelper.ADBHelper.ScreenShoot(device);
 
                         var x = KAutoHelper.CaptureHelper.ResizeImage(screen, 960, 560);
 
-                        var cauhoi = Invert(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(181, 86, 400, 32)));
+                        var cauhoi = Invert(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(181, 86, 400, 24)));
                         var dapanA = Invert(KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(192, 262, 168, 32)), 1.05));
                         var dapanB = Invert(KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(392, 262, 168, 32)), 1.05));
                         var dapanC = Invert(KAutoHelper.CaptureHelper.ScaleImage(KAutoHelper.CaptureHelper.CropImage(x, new System.Drawing.Rectangle(592, 262, 168, 32)), 1.05));
@@ -109,20 +129,29 @@ namespace HoaDang
                             string dapanCtext = api.GetTextFromImage(dapanC) ?? "";
                             string dapanDtext = api.GetTextFromImage(dapanD) ?? "";
 
-                            var httpClient = new HttpClient();
+                            IEnumerable<KeyValuePair<string, string>> queries = new List<KeyValuePair<string, string>>()
+                            {
+                                new KeyValuePair<string, string>("cauhoi", cauhoitext),
+                                new KeyValuePair<string, string>("A", dapanAtext),
+                                new KeyValuePair<string, string>("B", dapanBtext),
+                                new KeyValuePair<string, string>("C", dapanCtext),
+                                new KeyValuePair<string, string>("D", dapanDtext)
+                            };
 
-                            var response = await httpClient.GetAsync("http://vannt.click/get?cauhoi=" + cauhoitext + "&A=" + dapanAtext + "&B=" + dapanBtext + "&C=" + dapanCtext + "&D=" + dapanDtext);
+                            HttpContent q = new FormUrlEncodedContent(queries);
+
+                            var response = await httpClient.PostAsync("http://vannt.click/get", q);
 
                             var data = await response.Content.ReadAsStringAsync();
 
                             var answer = JsonConvert.DeserializeObject<AnswerResult>(data);
 
-                            if(!answer.Status)
+                            if (!answer.Status)
                             {
                                 MessageBox.Show(answer.Message, "Lỗi");
 
                                 Application.Exit();
-                                
+
                             }
                             else if (answer.Message.Equals("1"))
                             {
@@ -143,11 +172,11 @@ namespace HoaDang
 
                             i++;
 
-                            Task.Delay(1000).Wait();
+                            Task.Delay(500).Wait();
 
                             KAutoHelper.ADBHelper.TapByPercent(device, 54.4, 31.4);
 
-                            Task.Delay(2000).Wait();
+                            Task.Delay(500).Wait();
 
                         }
 
@@ -156,16 +185,13 @@ namespace HoaDang
 
                         dataGridView1.Refresh();
 
-                        Task.Delay(2000).Wait();
-
                     }
 
                     a.Name = device;
                     a.Progress = (i - 1) + "/40";
                     a.Status = "Hoàn thành";
 
-                    i = 1;
-                    isRun = false;
+                    run = false;
 
                     dataGridView1.Refresh();
                     return;
@@ -183,25 +209,10 @@ namespace HoaDang
             listDevice.Clear();
             devices.Clear();
 
-            listDevice = KAutoHelper.ADBHelper.GetDevices();
-
             var cmd = "adb kill-server && adb start-server";
             KAutoHelper.ADBHelper.ExecuteCMD(cmd.ToString());
-            listDevice = KAutoHelper.ADBHelper.GetDevices();
 
-            listDevice.ForEach(x =>
-            {
-                var device = new Device();
-                device.Name = x;
-                device.Progress = 0 + "/40";
-                device.Status = "Chưa chạy";
-
-                devices.Add(device);
-            });
-            dataGridView1.AutoGenerateColumns = false;
-            dataGridView1.Refresh();
-
-            txtDevice.Text = devices.Count().ToString();
+            Application.Restart();
 
         }
 
@@ -225,10 +236,6 @@ namespace HoaDang
             isRun = false;
         }
 
-        private void lblExpired_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 
     public class Device
