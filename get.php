@@ -11,7 +11,7 @@ $stmt->execute([
 
 $license = $stmt->fetch();
 
-if (!$license) {
+if ($license == null || !getStatus($license['expired_at'])) {
     echo json_encode([
         'status' => false,
         'message' => 'License hết hạn'
@@ -58,7 +58,7 @@ if (!$license) {
         } else {
             $select = 4;
         }
-
+        
         echo json_encode([
             'status' => true,
             'message' => $select

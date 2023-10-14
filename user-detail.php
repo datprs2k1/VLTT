@@ -13,14 +13,14 @@ if ($_SESSION['role'] != '1') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    $id = isset($_GET['id']) ? $_GET['id'] : '';
+    $id = $_SESSION['id'];
 
     $stmt = $pdo->prepare('SELECT `id`, `name`, `email`, `password`, `role` FROM `users` WHERE `id` = ?');
     $stmt->execute([$id]);
 
     $user = $stmt->fetch();
 
-    $stmt = $pdo->prepare('SELECT `id`, `ip`, `expired_at` FROM `licenses` WHERE `user_id` = ?');
+    $stmt = $pdo->prepare('SELECT `id`, `ip`, `note`, `expired_at` FROM `licenses` WHERE `user_id` = ?');
     $stmt->execute([$id]);
 
     $licenses = $stmt->fetchAll();
@@ -92,6 +92,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             IP
                         </th>
                         <th scope="col" class="px-6 py-3">
+                            Note
+                        </th>
+                        <th scope="col" class="px-6 py-3">
                             Trạng thái
                         </th>
                         <th scope="col" class="px-6 py-3">
@@ -112,6 +115,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </td>
                             <td class="px-6 py-4">
                                 <?= $license['ip'] ?>
+                            </td>
+                             <td class="px-6 py-4">
+                                <?= $license['note'] ?>
                             </td>
                             <td class="px-6 py-4">
                                 <?= getStatus($license['expired_at']) ? '<span class="bg-green-100 text-green-800 text-lg font-medium mr-2 px-2.5 py-0.5 rounded border border-green-400">Hoạt động</span>'

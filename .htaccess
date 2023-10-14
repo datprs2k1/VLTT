@@ -1,10 +1,20 @@
+### Rewrite Rules Added by CyberPanel Rewrite Rule Generator
+
+RewriteEngine On
+RewriteCond %{HTTPS}  !=on
+RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
+
+### End CyberPanel Generated Rules.
+
 RewriteEngine on  
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
 RewriteRule login login.php
 RewriteRule admin admin.php
+RewriteRule check check.php
 RewriteRule user/create user-add.php
 RewriteRule ^user/(.*)$ ./user-detail.php?id=$1
+RewriteRule ^user/license/(.*)$ ./add-license.php?id=$1
 RewriteRule ^getinfo$ getInfo.php
 RewriteRule ^get$ get.php

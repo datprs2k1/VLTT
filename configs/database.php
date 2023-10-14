@@ -2,9 +2,9 @@
 
 
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'volam');
+define('DB_USER', 'vannt_hoadang');
+define('DB_PASS', 'Hoangdat9a@');
+define('DB_NAME', 'vannt_hoadang');
 
 $db_host = defined('DB_HOST') ? DB_HOST : 'localhost';
 $db_user = defined('DB_USER') ? DB_USER : '';

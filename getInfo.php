@@ -16,7 +16,7 @@ $stmt = $pdo->prepare('SELECT COUNT(`id`) as `total` FROM `users`');
 $stmt->execute();
 $total = $stmt->fetch()['total'];
 
-if (!$license) {
+if ($license == null || !getStatus($license['expired_at'])) {
     echo json_encode([
         'status' => false,
         'message' => 'License hết hạn'
@@ -33,7 +33,7 @@ if (!$license) {
         'status' => true,
         'message' => 'Hoạt động',
         'name' => $user['name'],
-        'expired_at' => $license['expired_at'],
+        'expired' => $license['expired_at'],
         'total' => $total
     ]);
 }

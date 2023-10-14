@@ -15,7 +15,7 @@ if ($_SESSION['role'] != '1') {
 $notif = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    $id = isset($_GET['id']) ? $_GET['id'] : '';
+    $id = $_SESSION['id'];
     $stmt = $pdo->prepare('SELECT `id`, `name` FROM `users` WHERE id = ?');
     $stmt->execute([$id]);
 
@@ -23,10 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $id = isset($_POST['id']) ? $_POST['id'] : '';
+    $id = $_SESSION['id'];
+    $note = isset($_POST['note']) ? $_POST['note'] : '';
     $loai = isset($_POST['loai']) ? $_POST['loai'] : '';
-
-    echo $id;
 
     if ($loai == 1) {
         $expire = date('Y-m-d H:i:s', strtotime('+1 day'));
@@ -36,9 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $expire = date('Y-m-d H:i:s', strtotime('+1 month'));
     }
 
-    $stmt = $pdo->prepare('INSERT INTO `licenses` (`id`, `user_id`, `expired_at`) VALUES (?, ?, ?)');
+    $stmt = $pdo->prepare('INSERT INTO `licenses` (`id`, `note`, `user_id`, `expired_at`) VALUES (?, ?, ?, ?)');
     $result = $stmt->execute([
         uniqid(),
+        $note,
         $id,
         $expire,
     ]);
@@ -82,6 +82,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <input id="user" value="<?= $user['name'] ?>" type="text" class="border-[1px] border-slate-200 rounded-md p-2 w-full mt-2" disabled />
                             </div>
                         </div>
+                        <div class="my-2">
+                    <label for="note">Note</label>
+                    <input type="text" id="note" name="note" class="border-[1px] border-slate-200 rounded-md p-2 w-full mt-2" />
+                </div>
                         <div class="my-2">
                             <label for="loai">Loại</label>
                             <select id="loai" name="loai" class="border-[1px] border-slate-200 rounded-md p-2 w-full mt-2">

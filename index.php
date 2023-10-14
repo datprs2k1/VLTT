@@ -5,12 +5,12 @@ $title = "Trang quản lý";
 require_once('layouts/header.php');
 
 if (!isset($_SESSION['id'])) {
-    header('Location: ' . SITE_URL . '/login.php');
+    header('Location: ' . SITE_URL . '/login');
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
-    $stmt = $pdo->prepare('SELECT `id`, `ip`, `user_id`, `expired_at` FROM `licenses` WHERE user_id = ?');
+    $stmt = $pdo->prepare('SELECT `id`, `ip`, `note`, `user_id`, `expired_at` FROM `licenses` WHERE user_id = ?');
     $stmt->execute([
         $_SESSION['id']
     ]);
@@ -20,11 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = isset($_POST['id']) ? $_POST['id'] : '';
+    $note = isset($_POST['note']) ? $_POST['note'] : '';
     $ip = isset($_POST['ip']) ? $_POST['ip'] : '';
 
-    $stmt = $pdo->prepare('UPDATE `licenses` SET `ip` = ? WHERE id = ?');
+    $stmt = $pdo->prepare('UPDATE `licenses` SET `ip` = ?, `note` = ? WHERE id = ?');
     $result = $stmt->execute([
         $ip,
+        $note,
         $id
     ]);
 
@@ -43,6 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <div class="w-full mt-10">
                 <span class="text-sm md:text-lg font-bold"><?= $_SESSION['name'] ?></span>
+                 <div class="text-lg text-rose-700">
+                <i class="fas fa-server"> <?= getIP() ?></i>
+                </div>
             </div>
         </div>
     </div>
@@ -61,6 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </th>
                         <th scope="col" class="px-6 py-3">
                             IP
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Note
                         </th>
                         <th scope="col" class="px-6 py-3">
                             Trạng thái
@@ -85,6 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <?= $license['ip'] ?>
                             </td>
                             <td class="px-6 py-4">
+                                <?= $license['note'] ?>
+                            </td>
+                            <td class="px-6 py-4">
                                 <?= getStatus($license['expired_at']) ? '<span class="bg-green-100 text-green-800 text-lg font-medium mr-2 px-2.5 py-0.5 rounded border border-green-400">Hoạt động</span>'
                                     :
                                     '<span class="bg-red-100 text-red-800 text-lg font-medium mr-2 px-2.5 py-0.5 rounded border border-red-400">Hết hạn</span>' ?>
@@ -93,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <?= $license['expired_at'] ?>
                             </td>
                             <td>
-                                <button type="button" data-id="<?= $license['id'] ?>" class="btn-edit inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto">Sửa IP</button>
+                                <button type="button" data-id="<?= $license['id'] ?>" data-note="<?= $license['note'] ?>" data-ip="<?= $license['ip'] ?>" class="btn-edit inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto">Sửa IP</button>
                             </td>
                         </tr>
                     <?php
@@ -128,6 +139,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <label for="ip">IP</label>
                                         <input type="text" id="ip" name="ip" class="border-[1px] border-slate-200 rounded-md p-2 w-full mt-2" />
                                     </div>
+                                    <div class="my-2">
+                                        <label for="note">Note</label>
+                                        <input type="text" id="note" name="note" class="border-[1px] border-slate-200 rounded-md p-2 w-full mt-2" />
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -150,7 +165,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $(".btn-edit").on("click", function() {
             var id = $(this).data("id");
+            var ip = $(this).data("ip");
+            var note = $(this).data("note");
+
             $("#license").val(id);
+            $("#ip").val(ip);
+            $("#note").val(note);
+
             $("#modal").removeClass("hidden");
         });
 
